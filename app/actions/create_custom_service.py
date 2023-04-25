@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class CreateDynamicService(BaseCreateService):
+class CreateCustomService(BaseCreateService):
 
     def _create_cookiecutter(self, props: dict):
         cookiecutter_template_url = props.pop('cookiecutter_url')
