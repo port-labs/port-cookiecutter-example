@@ -14,9 +14,13 @@ class BaseCreateService:
     def create(self, github_org: str, github_repo: str, props: dict) -> Union[Literal['FAILURE'], Literal['SUCCESS']]:
         project_dir = None
         try:
+            logger.info(f"{self.__class__.__name__} - create cookiecutter")
             project_dir = self._create_cookiecutter(props)
+            logger.info(f"{self.__class__.__name__} - create repo")
             github.create_repo(github_org, github_repo)
+            logger.info(f"{self.__class__.__name__} - init repo")
             repo = git.init_repo(project_dir)
+            logger.info(f"{self.__class__.__name__} - upload repo files")
             git.upload_all_files(repo, github_org, github_repo)
             logger.info(f"{self.__class__.__name__} - success")
             return 'SUCCESS'
