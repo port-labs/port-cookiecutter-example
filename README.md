@@ -21,6 +21,7 @@ For each event, the backend creates new project using Cookiecutter, and new GitH
 Finally, the backend creates new Port Entity for `Service` blueprint, and updates Port Action run.
 
 ## Table of Contents
+
 1. [Local Setup](#Localhost)
 2. [Webhook Setup](#Webhook)
 3. [Port Setup](#Port)
@@ -34,11 +35,13 @@ Finally, the backend creates new Port Entity for `Service` blueprint, and update
 ### Localhost
 
 1. Make sure that the Docker daemon is available and running
+
 ```
 $ docker info
 ```
 
 2. Create `.env` file with the required environment variables
+
 ```
 $ cat .env
 
@@ -50,6 +53,7 @@ GH_ACCESS_TOKEN=<GH_ACCESS_TOKEN>
 Make sure your `GH_ACCESS_TOKEN` has relevant scopes for create new repository in your organization, and push to it.
 
 3. Build example's Docker image
+
 ```
 $ docker build -t getport.io/port-cookiecutter-example .
 ```
@@ -57,11 +61,13 @@ $ docker build -t getport.io/port-cookiecutter-example .
 4. Run example's Docker image with `.env`
 
 To change the default port (`80`) to `8080` for example, replace command's flags with the following: `-p 80:8080 -e PORT="8080"`
+
 ```
 $ docker run -d --name getport.io-port-cookiecutter-example -p 80:80 --env-file .env getport.io/port-cookiecutter-example
 ```
 
 5. Verify that the Docker container is up and running, and ready to listen for new webhooks:
+
 ```
 $ docker logs -f getport.io-port-cookiecutter-example
 
@@ -78,16 +84,18 @@ $ docker logs -f getport.io-port-cookiecutter-example
 
 ### Webhook
 
-1. Create public URL for your local application. 
+1. Create public URL for your local application.
 
-In this tutorial, we create a new channel in [smee.io](https://smee.io/), and use provided `Webhook Proxy URL`. 
+In this tutorial, we create a new channel in [smee.io](https://smee.io/), and use provided `Webhook Proxy URL`.
 
 2. Install the Smee client:
+
 ```
 $ pip install pysmee
 ```
 
 3. Use installed `pysmee` client to forward the events to your localhost API URL (replace `<SMEE_WEBHOOK_PROXY_URL>`):
+
 ```
 pysmee forward <SMEE_WEBHOOK_PROXY_URL> http://localhost:80/api/service
 ```
@@ -95,6 +103,7 @@ pysmee forward <SMEE_WEBHOOK_PROXY_URL> http://localhost:80/api/service
 ### Port
 
 1. Create `Service` blueprint:
+
 ```
 {
     "identifier": "service",
@@ -214,11 +223,55 @@ pysmee forward <SMEE_WEBHOOK_PROXY_URL> http://localhost:80/api/service
         },
         "trigger": "CREATE",
         "description": "Creates a new Go service"
-    }
+    },
+    {
+    "identifier": "CreateCustomService",
+    "title": "Create Custom Service",
+    "icon": "Github",
+    "userInputs": {
+      "properties": {
+        "cookiecutter_url": {
+          "type": "string",
+          "format": "url",
+          "title": "Cookiecutter Template URL",
+          "default": "https://github.com/lacion/cookiecutter-golang"
+        },
+        "github_organization": {
+          "type": "string",
+          "title": "GitHub Organization",
+          "description": "The name of the GitHub organization to create the new repository in"
+        },
+        "github_repository": {
+          "type": "string",
+          "title": "GitHub Repository",
+          "description": "The name of the new repository to create and scaffold the cookiecutter template in"
+        },
+        "app_name": {
+          "type": "string",
+          "title": "Application Name",
+          "description": "Name for the application scaffolded using cookiecutter"
+        },
+        "project_short_description": {
+          "type": "string",
+          "title": "Project Short Description",
+          "description": "Description field value for the new repository"
+        }
+      },
+      "required": []
+    },
+    "invocationMethod": {
+      "type": "WEBHOOK",
+      "url": "<WEBHOOK_URL>"
+    },
+    "trigger": "CREATE",
+    "description": "Scaffold a new repository from a custom cookiecutter template",
+    "requiredApproval": false
+  }
 ]
 ```
 
 3. Run the action with some input (replace `<OUTPUT_GITHUB_ORG>`, `<OUTPUT_GITHUB_REPO>`):
+
 ```
 {
   "github_organization": "<OUTPUT_GITHUB_ORG>",
